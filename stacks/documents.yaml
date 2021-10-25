@@ -1,0 +1,167 @@
+Resources:
+  DevBoxDoc:
+    Type: AWS::SSM::Document
+    Properties:
+      DocumentType: Command
+      Name: DevBoxInstallDevBoxPackages
+      Tags:
+        - Key: Kind
+          Value: devbox
+      TargetType: /AWS::EC2::Instance
+      Content:
+        schemaVersion: "2.2"
+        description: Install base packages on Ubuntu
+        mainSteps:
+          - action: aws:runShellScript
+            name: InstallBasePackages
+            precondition:
+              StringEquals:
+              - platformType
+              - Linux
+            inputs:
+              runCommand:
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common build-essential
+
+  OnePasswordCLIDoc:
+    Type: AWS::SSM::Document
+    Properties:
+      DocumentType: Command
+      Name: InstallOnePasswordCLI
+      Tags:
+        - Key: Kind
+          Value: devbox
+      TargetType: /AWS::EC2::Instance
+      Content:
+        schemaVersion: "2.2"
+        description: Install 1Password CLI on Ubuntu
+        mainSteps:
+          - action: aws:runShellScript
+            name: Install1PW
+            precondition:
+              StringEquals:
+              - platformType
+              - Linux
+            inputs:
+              runCommand:
+                - curl -L -o /tmp/1password-cli.zip https://cache.agilebits.com/dist/1P/op/pkg/v1.12.2/op_linux_arm64_v1.12.2.zip
+                - unzip -d /usr/local/bin /tmp/1password-cli.zip 
+                - rm -rf /usr/local/bin/op.sig
+
+  DockerDoc:
+    Type: AWS::SSM::Document
+    Properties:
+      DocumentType: Command
+      Name: DevBoxInstallDocker
+      Tags:
+        - Key: Kind
+          Value: devbox
+      TargetType: /AWS::EC2::Instance
+      Content:
+        schemaVersion: "2.2"
+        description: Install Docker on Ubuntu
+        parameters:
+          arch:
+            type: String
+            default: arm64
+            description: Instance architecture type
+            allowedValues:
+              - arm64
+              - amd64
+          release:
+            type: String
+            default: focal
+            allowedValues:
+              - focal
+              - bionic
+        mainSteps:
+          - action: aws:runShellScript
+            name: DevBoxInstallDocker
+            precondition:
+              StringEquals:
+              - platformType
+              - Linux
+            inputs:
+              runCommand:
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y apt-transport-https ca-certificates curl gnupg lsb-release
+                - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+                - add-apt-repository 'deb [arch={{ arch }}] https://download.docker.com/linux/ubuntu {{ release }} stable'
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y docker-ce docker-ce-cli containerd.io
+                - usermod -aG docker ubuntu
+
+  GitDoc:
+    Type: AWS::SSM::Document
+    Properties:
+      DocumentType: Command
+      Name: DevBoxInstallGit
+      Tags:
+        - Key: Kind
+          Value: devbox
+      TargetType: /AWS::EC2::Instance
+      Content:
+        schemaVersion: "2.2"
+        description: Install Go on Ubuntu
+        mainSteps:
+          - action: aws:runShellScript
+            name: InstallRust
+            precondition:
+              StringEquals:
+              - platformType
+              - Linux
+            inputs:
+              runCommand:
+                - add-apt-repository ppa:git-core/ppa
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y git
+
+  GoDoc:
+    Type: AWS::SSM::Document
+    Properties:
+      DocumentType: Command
+      Name: DevBoxInstallGo
+      Tags:
+        - Key: Kind
+          Value: devbox
+      TargetType: /AWS::EC2::Instance
+      Content:
+        schemaVersion: "2.2"
+        description: Install Go on Ubuntu
+        mainSteps:
+          - action: aws:runShellScript
+            name: InstallGo
+            precondition:
+              StringEquals:
+              - platformType
+              - Linux
+            inputs:
+              runCommand:
+                - add-apt-repository ppa:longsleep/golang-backports
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y golang-go
+
+  RustDoc:
+    Type: AWS::SSM::Document
+    Properties:
+      DocumentType: Command
+      Name: DevBoxInstallRust
+      Tags:
+        - Key: Kind
+          Value: devbox
+      TargetType: /AWS::EC2::Instance
+      Content:
+        schemaVersion: "2.2"
+        description: Install Rust on Ubuntu
+        mainSteps:
+          - action: aws:runShellScript
+            name: InstallRust
+            precondition:
+              StringEquals:
+              - platformType
+              - Linux
+            inputs:
+              runCommand:
+                - add-apt-repository ppa:ubuntu-mozilla-security/rust-next
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y rustc cargo
