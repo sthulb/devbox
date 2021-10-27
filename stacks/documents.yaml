@@ -39,6 +39,30 @@ Resources:
                 - unzip -d /usr/local/bin /tmp/1password-cli.zip 
                 - rm -rf /usr/local/bin/op.sig
           - action: aws:runShellScript
+            name: InstallAWSCLIArm
+            preconditions:
+              StringEquals:
+              - arch
+              - arm64
+            inputs:
+              runCommand:
+                - curl -L -o /tmp/aws-cli.zip https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
+                - unzip -d /tmp /tmp/aws-cli.zip 
+                - /tmp/aws/install
+                - rm -rf /tmp/aws
+          - action: aws:runShellScript
+            name: InstallAWSCLIIntel
+            preconditions:
+              StringEquals:
+              - arch
+              - amd64
+            inputs:
+              runCommand:
+                - curl -L -o /tmp/aws-cli.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+                - unzip -d /tmp /tmp/aws-cli.zip 
+                - /tmp/aws/install
+                - rm -rf /tmp/aws
+          - action: aws:runShellScript
             name: DevBoxInstallDocker
             inputs:
               runCommand:
