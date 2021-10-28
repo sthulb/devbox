@@ -40,7 +40,7 @@ Resources:
                 - rm -rf /usr/local/bin/op.sig
           - action: aws:runShellScript
             name: InstallAWSCLIArm
-            preconditions:
+            precondition:
               StringEquals:
               - arch
               - arm64
@@ -52,7 +52,7 @@ Resources:
                 - rm -rf /tmp/aws
           - action: aws:runShellScript
             name: InstallAWSCLIIntel
-            preconditions:
+            precondition:
               StringEquals:
               - arch
               - amd64
