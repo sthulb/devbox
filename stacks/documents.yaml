@@ -42,7 +42,7 @@ Resources:
             name: InstallAWSCLIArm
             precondition:
               StringEquals:
-              - arch
+              - "{{ arch }}"
               - arm64
             inputs:
               runCommand:
@@ -54,7 +54,7 @@ Resources:
             name: InstallAWSCLIIntel
             precondition:
               StringEquals:
-              - arch
+              - "{{ arch }}"
               - amd64
             inputs:
               runCommand:
