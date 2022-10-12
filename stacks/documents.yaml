@@ -35,7 +35,7 @@ Resources:
             name: Install1PW
             inputs:
               runCommand:
-                - curl -L -o /tmp/1password-cli.zip https://cache.agilebits.com/dist/1P/op/pkg/v1.12.2/op_linux_arm64_v1.12.2.zip
+                - curl -L -o /tmp/1password-cli.zip https://cache.agilebits.com/dist/1P/op2/pkg/v2.7.1/op_linux_arm64_v2.7.1.zip
                 - unzip -d /usr/local/bin /tmp/1password-cli.zip 
                 - rm -rf /usr/local/bin/op.sig
           - action: aws:runShellScript
