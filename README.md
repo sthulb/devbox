@@ -2,6 +2,17 @@
 
 `devbox` is the EC2 instance I use for development for all of my work. Right now it probably doesn't hold much value for anyone else.
 
+## What this does
+This repo will create an EC2 instance and associated VPC in Amazon EC2 that you can use for development work. It will install:
+- Go
+- Rust
+- AWS CLI
+- Docker
+- Git
+
+## What this doesn't do
+It doesn't create unicorns or configure your dev environment's dotfiles. Batteries aren't included.
+
 ## Deployment
 There's a number of steps to run through to deploy this in your AWS Account.
 
