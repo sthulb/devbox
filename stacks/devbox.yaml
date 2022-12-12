@@ -1,9 +1,12 @@
 Parameters:
   KeyName:
     Type: AWS::EC2::KeyPair::KeyName
+    Description: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html
 
-  HostedZoneID:
-    Type: AWS::Route53::HostedZone::Id
+  InstancesNeeded:
+    Type: Number
+    Default: 1
+
 
 Mappings:
   Subnets:
@@ -170,8 +173,8 @@ Resources:
       AutoScalingReplacingUpdate:
         WillReplace: true
     Properties:
-      MaxSize: '1'
-      MinSize: '1'
+      MaxSize: !Ref InstancesNeeded
+      MinSize: !Ref InstancesNeeded
       HealthCheckGracePeriod: 300
       LaunchTemplate:
         Version: !Sub ${LaunchTemplate.LatestVersionNumber}
