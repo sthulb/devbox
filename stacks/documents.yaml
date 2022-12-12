@@ -15,15 +15,19 @@ Resources:
             type: String
             default: arm64
             description: Instance architecture type
-            allowedValues:
+            allowedValue  s:
               - arm64
               - amd64
           release:
             type: String
-            default: focal
+            default: jammy
             allowedValues:
               - focal
               - bionic
+              - jammy
+          node_version:
+            type: String
+            default: node_18.x
         mainSteps:
           - action: aws:runShellScript
             name: InstallBasePackages
@@ -94,6 +98,14 @@ Resources:
                 - add-apt-repository ppa:ubuntu-mozilla-security/rust-next
                 - apt update
                 - DEBIAN_FRONTEND=noninteractive apt install -y rustc cargo
+          - action: aws:runShellScript
+            name: InstallNode
+            inputs:
+              runCommand:
+                - curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | gpg --dearmor -o /usr/share/keyrings/nodesource-keyring.gpg
+                - echo "deb [arch={{ arch }} signed-by=/usr/share/keyrings/nodesource-keyring.gpg] https://deb.nodesource.com/{{ node_version }}  {{ release }} main" >> /etc/apt/sources.list.d/nodesource.list
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y nodejs
 
   DevBoxAssoc:
     Type: AWS::SSM::Association
