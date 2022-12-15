@@ -32,7 +32,9 @@ The devbox will take a while to provision with all of the software that it's tol
 
 Install the [VSCode Remote SSH extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) in VSCode, and then follow the [docs for it](https://code.visualstudio.com/docs/remote/ssh).
 
-The AMI in use is Ubuntu, so you'll need to use a SSH command similar to:
+The AMI in use is Ubuntu, when VSCode asks you for the SSH command, you'll want to use something similar to this:
 ```sh
 ssh ubuntu@<ip> -i <full path to keypair pem file>
 ```
+
+Window's users will need to use an absolute path to the key, with forward slashes `C:/Users/sthulb/Downloads/key.pem`.
