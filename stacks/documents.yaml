@@ -11,13 +11,6 @@ Resources:
         schemaVersion: "2.2"
         description: Install packages on Ubuntu
         parameters:
-          arch:
-            type: String
-            default: arm64
-            description: Instance architecture type
-            allowedValues:
-              - arm64
-              - amd64
           release:
             type: String
             default: jammy
@@ -27,7 +20,7 @@ Resources:
               - jammy
           nodeVersion:
             type: String
-            default: node_18.x
+            default: node_20.x
         mainSteps:
           - action: aws:runShellScript
             name: InstallBasePackages
@@ -39,33 +32,27 @@ Resources:
             name: Install1PW
             inputs:
               runCommand:
-                - curl -L -o /tmp/1password-cli.zip https://cache.agilebits.com/dist/1P/op2/pkg/v2.7.1/op_linux_arm64_v2.7.1.zip
-                - unzip -d /usr/local/bin /tmp/1password-cli.zip 
-                - rm -rf /usr/local/bin/op.sig
+
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y apt-transport-https ca-certificates curl gnupg lsb-release
+                - curl -fsSL https://downloads.1password.com/linux/keys/1password.asc | gpg --dearmor -o /usr/share/keyrings/1password-archive-keyring.gpg
+                - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/$(dpkg --print-architecture) stable main" >> /etc/apt/sources.list.d/1password.list
+                - mkdir -p /etc/debsig/policies/AC2D62742012EA22/
+                - curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol -o /etc/debsig/policies/AC2D62742012EA22/1password.pol
+                - mkdir -p /usr/share/debsig/keyrings/AC2D62742012EA22
+                - curl -sS https://downloads.1password.com/linux/keys/1password.asc | gpg --dearmor --output /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y 1password-cli
+
           - action: aws:runShellScript
-            name: InstallAWSCLIArm
-            precondition:
-              StringEquals:
-              - "{{ arch }}"
-              - arm64
+            name: InstallAWSCLI
             inputs:
               runCommand:
-                - curl -L -o /tmp/aws-cli.zip https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
+                - curl -L -o /tmp/aws-cli.zip https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip
                 - unzip -d /tmp /tmp/aws-cli.zip 
                 - /tmp/aws/install
                 - rm -rf /tmp/aws
-          - action: aws:runShellScript
-            name: InstallAWSCLIIntel
-            precondition:
-              StringEquals:
-              - "{{ arch }}"
-              - amd64
-            inputs:
-              runCommand:
-                - curl -L -o /tmp/aws-cli.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
-                - unzip -d /tmp /tmp/aws-cli.zip 
-                - /tmp/aws/install
-                - rm -rf /tmp/aws
+
           - action: aws:runShellScript
             name: DevBoxInstallDocker
             inputs:
@@ -73,10 +60,11 @@ Resources:
                 - apt update
                 - DEBIAN_FRONTEND=noninteractive apt install -y apt-transport-https ca-certificates curl gnupg lsb-release
                 - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-                - echo "deb [arch={{ arch }} signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu  {{ release }} stable" >> /etc/apt/sources.list.d/docker.list
+                - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu  {{ release }} stable" >> /etc/apt/sources.list.d/docker.list
                 - apt update
                 - DEBIAN_FRONTEND=noninteractive apt install -y docker-ce docker-ce-cli containerd.io
                 - usermod -aG docker ubuntu
+
           - action: aws:runShellScript
             name: InstallGit
             inputs:
@@ -84,6 +72,7 @@ Resources:
                 - add-apt-repository ppa:git-core/ppa
                 - apt update
                 - DEBIAN_FRONTEND=noninteractive apt install -y git
+
           - action: aws:runShellScript
             name: InstallGo
             inputs:
@@ -91,6 +80,7 @@ Resources:
                 - add-apt-repository ppa:longsleep/golang-backports
                 - apt update
                 - DEBIAN_FRONTEND=noninteractive apt install -y golang-go
+
           - action: aws:runShellScript
             name: InstallRust
             inputs:
@@ -98,14 +88,16 @@ Resources:
                 - add-apt-repository ppa:ubuntu-mozilla-security/rust-next
                 - apt update
                 - DEBIAN_FRONTEND=noninteractive apt install -y rustc cargo
+
           - action: aws:runShellScript
             name: InstallNode
             inputs:
               runCommand:
                 - curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | gpg --dearmor -o /usr/share/keyrings/nodesource-keyring.gpg
-                - echo "deb [arch={{ arch }} signed-by=/usr/share/keyrings/nodesource-keyring.gpg] https://deb.nodesource.com/{{ nodeVersion }}  {{ release }} main" >> /etc/apt/sources.list.d/nodesource.list
+                - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/nodesource-keyring.gpg] https://deb.nodesource.com/{{ nodeVersion }}  {{ release }} main" >> /etc/apt/sources.list.d/nodesource.list
                 - apt update
                 - DEBIAN_FRONTEND=noninteractive apt install -y nodejs
+                
           - action: aws:runShellScript
             name: BuildPython
             inputs: 
@@ -117,8 +109,8 @@ Resources:
                 - echo "export PYENV_ROOT=\"\$HOME/.pyenv\"" >> /home/ubuntu/.profile
                 - echo "command -v pyenv >/dev/null || export PATH=\"\$PYENV_ROOT/bin:$PATH\"" >> /home/ubuntu/.profile
                 - echo "eval \"\$(pyenv init -)\"" >> /home/ubuntu/.profile
-                - sudo -u ubuntu /home/ubuntu/.pyenv/bin/pyenv install 3.9
-                - echo "3.9" > /home/ubuntu/.pyenv/version
+                - sudo -u ubuntu /home/ubuntu/.pyenv/bin/pyenv install 3.11
+                - echo "3.11" > /home/ubuntu/.pyenv/version
                 - chown ubuntu:ubuntu /home/ubuntu/.pyenv
 
   DevBoxAssoc:
