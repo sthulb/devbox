@@ -157,10 +157,6 @@ Resources:
     Properties:
       GroupDescription: devbox
       SecurityGroupIngress:
-        - FromPort: 2376
-          ToPort: 2376
-          CidrIp: 0.0.0.0/0
-          IpProtocol: TCP
         - FromPort: 22
           ToPort: 22
           CidrIp: 0.0.0.0/0
