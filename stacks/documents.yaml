@@ -13,14 +13,15 @@ Resources:
         parameters:
           release:
             type: String
-            default: jammy
+            default: noble
             allowedValues:
               - focal
               - bionic
               - jammy
+              - noble
           nodeVersion:
             type: String
-            default: node_20.x
+            default: node_22.x
         mainSteps:
           - action: aws:runShellScript
             name: InstallBasePackages
@@ -32,7 +33,6 @@ Resources:
             name: Install1PW
             inputs:
               runCommand:
-
                 - apt update
                 - DEBIAN_FRONTEND=noninteractive apt install -y apt-transport-https ca-certificates curl gnupg lsb-release
                 - curl -fsSL https://downloads.1password.com/linux/keys/1password.asc | gpg --dearmor -o /usr/share/keyrings/1password-archive-keyring.gpg
