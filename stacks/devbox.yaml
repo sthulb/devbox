@@ -137,7 +137,7 @@ Resources:
         Monitoring:
           Enabled: true
         ImageId: >-
-          {{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}
+          {{resolve:ssm:/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp2/ami-id}}
         InstanceType: c5.4xlarge
         SecurityGroupIds:
           - !Ref SecurityGroup
